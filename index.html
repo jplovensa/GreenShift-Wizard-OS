@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GreenShift Wizard OS - Role Engineered</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --emerald-400: #34d399;
+            --emerald-500: #10b981;
+            --rose-400: #fb7185;
+            --rose-500: #f43f5e;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: #030604; color: #f3f4f6; overflow: hidden; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-panel { background: rgba(3, 7, 5, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(16, 185, 129, 0.12); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8); }
+        .sub-panel { background: rgba(16, 185, 129, 0.02); border: 1px solid rgba(16, 185, 129, 0.1); cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        .sub-panel:hover { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.04); }
+        .active-panel { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.1); cursor: default; transition: all 0.3s; }
+        
+        .emerald-glow { text-shadow: 0 0 15px rgba(16, 185, 129, 0.5); }
+        .rose-glow { text-shadow: 0 0 15px rgba(244, 63, 94, 0.5); }
+        .white-glow { filter: drop-shadow(0 0 15px rgba(255,255,255,0.7)); }
+        
+        .scrollable { overflow-y: auto; scrollbar-width: none; }
+        .scrollable::-webkit-scrollbar { display: none; }
+        
+        .bg-blueprint { background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); }
+        .blueprint-hatch { background: repeating-linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.1) 2px, transparent 2px, transparent 8px); }
+        
+        .eps-pattern {
+            background-color: rgba(16, 185, 129, 0.05);
+            background-image: radial-gradient(rgba(16, 185, 129, 0.4) 1px, transparent 1px), radial-gradient(rgba(16, 185, 129, 0.2) 1px, transparent 1px);
+            background-size: 10px 10px; background-position: 0 0, 5px 5px; backdrop-filter: blur(1px);
+        }
+        
+        .holo-container { perspective: 1000px; transform-style: preserve-3d; }
+        .holo-scene { transform: rotateX(60deg) rotateZ(45deg); transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); animation: float-3d 6s ease-in-out infinite; }
+        .holo-layer { position: absolute; inset: 0; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { height: 2px; background: rgba(16, 185, 129, 0.2); border-radius: 1px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #fff; margin-top: -7px; cursor: pointer; box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]:disabled::-webkit-slider-thumb { background: #555; cursor: not-allowed; box-shadow: none; }
+
+        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scanline-vertical { 0% { top: -10%; } 100% { top: 110%; } }
+        .animate-scanline-v { animation: scanline-vertical 3s linear infinite; }
+        @keyframes float-3d { 0%, 100% { transform: rotateX(60deg) rotateZ(45deg) translateZ(0px); } 50% { transform: rotateX(60deg) rotateZ(45deg) translateZ(10px); } }
+
+        /* --- CINEMATIC GOOGLE EPS WAND LOADER --- */
+        .g-dot-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .g-dot { 
+            width: 18px; height: 18px; border-radius: 50%; position: absolute; 
+            transition: all 1s cubic-bezier(0.4, 0.0, 0.2, 1); 
+        }
+        .g-blue { background-color: #4285F4; box-shadow: 0 0 15px rgba(66,133,244,0.5); }
+        .g-red { background-color: #EA4335; box-shadow: 0 0 15px rgba(234,67,53,0.5); }
+        .g-yellow { background-color: #FBBC05; box-shadow: 0 0 15px rgba(251,188,5,0.5); }
+        .g-green { background-color: #34A853; box-shadow: 0 0 15px rgba(52,168,83,0.5); }
+        
+        /* Phase 1: Google Dance (Horizontal) */
+        .loader-phase-1 .g-blue { transform: translateX(-45px); animation: g-bounce 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        .loader-phase-1 .g-red { transform: translateX(-15px); animation: g-bounce 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1) 0.2s; }
+        .loader-phase-1 .g-yellow { transform: translateX(15px); animation: g-bounce 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1) 0.4s; }
+        .loader-phase-1 .g-green { transform: translateX(45px); animation: g-bounce 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1) 0.6s; }
+
+        @keyframes g-bounce { 0% { margin-top: 15px; } 100% { margin-top: -15px; } }
+
+        /* Phase 2: Magic Wand (Vertical Stack & Spin) */
+        .loader-phase-2 { animation: wand-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .loader-phase-2 .g-dot { animation: none; margin-top: 0; }
+        .loader-phase-2 .g-blue { transform: translateY(-45px); }
+        .loader-phase-2 .g-red { transform: translateY(-15px); }
+        .loader-phase-2 .g-yellow { transform: translateY(15px); }
+        .loader-phase-2 .g-green { transform: translateY(45px); }
+
+        @keyframes wand-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg) scale(0.85); } }
+
+        /* Phase 3: EPS Core Hexagon Convergence */
+        .loader-phase-3 .g-dot {
+            transform: translate(0, 0) scale(3.5) rotate(360deg);
+            background-color: #10B981;
+            border-radius: 4px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.8);
+        }
+        .loader-phase-3 .g-blue, .loader-phase-3 .g-red, .loader-phase-3 .g-yellow { opacity: 0; }
+        
+        .magic-sparkle-fx { transition: all 1s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Print Canvas CSS (Bulletproof) */
+        @media print {
+            body > *:not(#print-canvas) { display: none !important; }
+            #print-canvas { display: block !important; visibility: visible; width: 100%; color: #000; background: #fff; padding: 20px; font-family: 'Inter', sans-serif; }
+            .print-header { border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 20px; }
+            .print-table { width: 100%; border-collapse: collapse; }
+            .print-table th { border-bottom: 2px solid #000; padding: 10px 5px; text-align: left; font-size: 12px; text-transform: uppercase; }
+            .print-table td { border-bottom: 1px solid #ddd; padding: 10px 5px; font-size: 14px; }
+            .print-total { border-top: 2px solid #10b981; font-weight: bold; font-size: 16px; }
+        }
+    </style>
+</head>
+<body class="h-[100dvh] flex flex-col relative bg-blueprint selection:bg-emerald-500/30 selection:text-white">
+
+    <!-- Ambient Architecture Glow -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] md:w-[1200px] h-[150vw] md:h-[800px] bg-emerald-900/10 rounded-full blur-[100px] md:blur-[180px] pointer-events-none z-0"></div>
+
+    <!-- CINEMATIC GOOGLE DESIGN VIDEO STYLE BOOT LOADER -->
+    <div id="boot-loader" class="fixed inset-0 z-50 bg-[#000000] flex flex-col items-center justify-center transition-all duration-[1200ms] ease-in-out">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(16,185,129,0.06)_0%,_transparent_60%)]"></div>
+        
+        <div class="relative flex flex-col items-center justify-center z-10 w-full">
+            <!-- Fluid Dancing Dot System -->
+            <div class="w-48 h-48 mb-8 relative flex items-center justify-center">
+                <div id="google-dots-container" class="g-dot-container loader-phase-1">
+                    <div class="g-dot g-blue"></div>
+                    <div class="g-dot g-red"></div>
+                    <div class="g-dot g-yellow"></div>
+                    <div class="g-dot g-green"></div>
+                    <!-- Magic Sparkle -->
+                    <i data-lucide="sparkles" id="magic-sparkle" class="absolute text-white w-8 h-8 opacity-0 z-20 magic-sparkle-fx drop-shadow-[0_0_15px_rgba(255,255,255,1)]"></i>
+                </div>
+            </div>
+            
+            <h1 id="boot-title" class="text-white font-sans font-light tracking-[0.3em] text-xl md:text-2xl uppercase opacity-0 transition-all duration-[1000ms] transform translate-y-4 text-center px-4">GreenShift</h1>
+            <p id="boot-subtitle" class="text-emerald-400 font-mono text-[9px] md:text-xs tracking-[0.2em] uppercase mt-3 opacity-0 transition-all duration-[1000ms] text-center">Wizard OS v5.0</p>
+            
+            <div class="absolute bottom-[-100px] w-full max-w-[80vw] md:max-w-xs h-[2px] bg-zinc-950 overflow-hidden rounded-full">
+                <div id="boot-progress" class="absolute inset-y-0 left-0 bg-emerald-400 w-0 transition-all duration-[1800ms] ease-out shadow-[0_0_15px_#10b981]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER: Studio Command Bar with Role Selector -->
+    <header class="h-16 shrink-0 flex items-center justify-between px-4 md:px-8 z-20 border-b border-emerald-900/30 bg-[#000000]/80 backdrop-blur-xl">
+        <div class="flex items-center gap-3 md:gap-5">
+            <div class="hidden md:flex w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 items-center justify-center">
+                <i data-lucide="wand-sparkles" class="w-4 h-4 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]"></i>
+            </div>
+            <h1 class="text-xs md:text-sm font-bold tracking-widest text-white uppercase flex items-center gap-1.5 md:gap-2">
+                GreenShift <span class="text-emerald-400 font-mono font-medium hidden sm:inline">Wizard_OS</span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-4 md:gap-6">
+            <!-- ROLE SELECTOR -->
+            <select id="role-selector" onchange="switchRole(this.value)" class="bg-emerald-900/20 text-emerald-400 text-[9px] md:text-[10px] uppercase font-mono px-3 py-1.5 rounded-md border border-emerald-900/50 outline-none appearance-none cursor-pointer hover:bg-emerald-800/30 transition-colors">
+                <option value="architect">Role: Architect / Estimator</option>
+                <option value="director">Role: Project Director</option>
+                <option value="executive">Role: Executive Board</option>
+            </select>
+            
+            <button id="btn-unlock" class="hidden flex items-center gap-2 text-[9px] md:text-[10px] text-zinc-400 hover:text-white uppercase tracking-widest font-mono transition-colors" onclick="resetEngine()">
+                <i data-lucide="unlock" class="w-3 h-3"></i> Unlock
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-4 md:gap-6 p-4 md:p-6 z-20">
+        
+        <!-- PILLAR 1: SCOPE PARAMETERS -->
+        <section class="w-full lg:w-1/4 glass-panel rounded-3xl flex flex-col min-h-0 relative shrink-0 lg:shrink transition-opacity duration-300" id="input-controls">
+            <div class="p-4 md:p-6 border-b border-emerald-900/30 shrink-0 flex justify-between">
+                <h2 class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-emerald-400 font-bold flex items-center gap-2">
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> 01. Project Scope & Cap
+                </h2>
+                <i data-lucide="lock" id="icon-lock-intent" class="w-3.5 h-3.5 text-zinc-600 hidden"></i>
+            </div>
+            <div class="p-4 md:p-6 scrollable flex flex-col gap-6 md:gap-8 min-h-[400px] lg:min-h-0">
+                <div class="shrink-0">
+                    <div class="flex justify-between mb-3 text-[10px] uppercase tracking-widest text-zinc-400 font-mono font-medium">
+                        <span>Floorplate Area</span><span class="text-white font-bold" id="ui-area-val">260 sqm</span>
+                    </div>
+                    <input type="range" id="input-area" min="100" max="1000" step="10" value="260" oninput="updateIntent('area', this.value)">
+                </div>
+
+                <div class="shrink-0">
+                    <div class="flex justify-between mb-3 text-[10px] uppercase tracking-widest text-zinc-400 font-mono font-medium">
+                        <span>Maximum GMP (Cap)</span><span class="text-white font-bold" id="ui-cap-val">600.0M</span>
+                    </div>
+                    <input type="range" id="input-cap" min="300000000" max="1000000000" step="10000000" value="600000000" oninput="updateIntent('cap', this.value)">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 md:gap-4 shrink-0">
+                    <div class="bg-emerald-900/10 border border-emerald-900/30 p-3 md:p-4 rounded-2xl flex flex-col items-center justify-center">
+                        <span class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1.5 font-semibold text-center">Target Margin</span>
+                        <span class="text-lg md:text-xl font-mono text-white font-medium" id="ui-margin-target">30%</span>
+                    </div>
+                    <div id="btn-nightshift" class="active-panel p-3 md:p-4 rounded-2xl flex flex-col items-center justify-center text-center animate-transition" onclick="toggleNightShift()">
+                        <span class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1.5 font-semibold">Night Shift Ops</span>
+                        <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-emerald-400" id="ui-night-val">Active</span>
+                    </div>
+                </div>
+
+                <div class="pt-6 md:pt-8 lg:mt-auto border-t border-emerald-900/30 shrink-0">
+                    <div class="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-4 md:mb-6 font-bold flex items-center gap-2">
+                        <i data-lucide="activity" class="w-3.5 h-3.5"></i> Live Telemetry
+                    </div>
+                    <div class="space-y-4 md:space-y-5">
+                        <div class="flex justify-between items-end">
+                            <span class="text-[9px] md:text-[10px] uppercase tracking-widest font-semibold text-zinc-400">Target Estimate</span>
+                            <span class="font-mono text-base md:text-lg font-bold transition-colors text-white" id="ui-req-rev">IDR 0.0M</span>
+                        </div>
+                        <div class="h-1.5 bg-[#000000] rounded-full overflow-hidden border border-emerald-900/50">
+                            <div id="ui-progress-bar" class="h-full bg-emerald-500 transition-all duration-300 animate-pulse-slow" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-[9px] md:text-[10px] uppercase tracking-widest font-semibold text-zinc-400">Net Profit</span>
+                            <span class="font-mono text-base md:text-lg font-bold text-emerald-400" id="ui-net-profit">IDR 0.0M</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PILLAR 2: THE PARAMETRIC SANDBOX -->
+        <section class="w-full lg:w-2/4 glass-panel rounded-3xl flex flex-col min-h-[700px] lg:min-h-0 relative overflow-hidden shrink-0 lg:shrink transition-opacity duration-300" id="sandbox-area">
+            
+            <div class="h-auto lg:h-[55%] border-b border-emerald-900/30 flex flex-col sm:flex-row relative shrink-0">
+                <div class="w-full sm:w-1/3 p-4 md:p-6 flex flex-col justify-center border-b sm:border-b-0 sm:border-r border-emerald-900/30 shrink-0">
+                    <div class="flex justify-between items-center mb-6 md:mb-8">
+                        <h2 class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-emerald-400 font-bold flex items-center gap-2">
+                            <i data-lucide="layers" class="w-3.5 h-3.5"></i> 02. Parametric BIM
+                        </h2>
+                        <i data-lucide="lock" id="icon-lock-sandbox" class="w-3.5 h-3.5 text-zinc-600 hidden"></i>
+                    </div>
+                    <div class="space-y-4 md:space-y-6 flex flex-row sm:flex-col justify-between sm:justify-start">
+                        <div>
+                            <div class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1 md:mb-1.5 flex items-center gap-1.5 font-semibold"><i data-lucide="volume-2" class="w-2.5 h-2.5"></i> Acoustic</div>
+                            <div class="font-mono text-lg md:text-xl text-white font-medium" id="ui-stc">0 dB</div>
+                        </div>
+                        <div>
+                            <div class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1 md:mb-1.5 flex items-center gap-1.5 font-semibold"><i data-lucide="thermometer" class="w-2.5 h-2.5"></i> R-Value</div>
+                            <div class="font-mono text-lg md:text-xl text-white font-medium" id="ui-rval">R-0.0</div>
+                        </div>
+                        <div>
+                            <div class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-zinc-500 mb-1 md:mb-1.5 flex items-center gap-1.5 font-semibold"><i data-lucide="maximize" class="w-2.5 h-2.5"></i> Usable</div>
+                            <div class="font-mono text-lg md:text-xl text-emerald-400 font-medium"><span id="ui-usable">0.0</span> <span class="text-[10px] md:text-xs text-zinc-500">m²</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="w-full sm:w-2/3 h-64 sm:h-auto flex items-center justify-center bg-black/40 holo-container relative shrink-0 overflow-hidden">
+                    <div class="absolute top-2 right-4 text-[8px] md:text-[9px] font-mono text-emerald-500/50 uppercase tracking-widest font-medium z-10">Fjäll Core Twin</div>
+                    
+                    <div class="holo-scene w-32 h-32 md:w-40 md:h-40 lg:w-44 lg:h-44 relative scale-90 md:scale-100">
+                        <div class="holo-layer bg-emerald-500/10 blur-2xl" style="transform: translateZ(-30px)"></div>
+                        <div class="holo-layer bg-zinc-950 border border-emerald-900 flex items-center justify-center shadow-[inset_0_0_30px_rgba(0,0,0,0.9)]" style="transform: translateZ(0px)">
+                            <span class="text-emerald-900/50 font-mono text-[7px] md:text-[8px] rotate-[-45deg] uppercase font-bold tracking-widest">Base</span>
+                        </div>
+                        <div id="holo-eps-slices"></div>
+                        <div id="holo-render" class="holo-layer bg-zinc-200 border border-white/20 shadow-[0_15px_40px_rgba(0,0,0,0.8)] flex items-center justify-center transition-all duration-[800ms]" style="transform: translateZ(55px)">
+                            <span id="holo-render-text" class="text-black/50 font-mono text-[8px] md:text-[10px] font-bold rotate-[-45deg] uppercase tracking-widest drop-shadow-md">Gypsum Coat</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 p-4 md:p-6 scrollable flex flex-col min-h-0 relative bg-black/20 lg:bg-transparent">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 md:mb-6 shrink-0">
+                    <h3 class="text-[10px] uppercase tracking-[0.2em] text-emerald-500 font-bold flex items-center gap-2">
+                        <i data-lucide="component" class="w-3.5 h-3.5"></i> Material Schedule
+                    </h3>
+                    <button onclick="executeNeuralCompile()" id="btn-compile" class="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-500 text-black rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-emerald-400 hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                        Run Takeoff <i data-lucide="wand-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+                <div class="flex flex-col gap-4 md:gap-6 pb-6" id="materials-grid"></div>
+            </div>
+
+            <!-- Overlays -->
+            <div id="overlay-wizard" class="hidden absolute inset-0 z-30 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-8 transition-opacity duration-300">
+                <div class="bg-[#030604] border border-rose-500/30 p-6 md:p-8 rounded-3xl max-w-sm w-full shadow-[0_0_50px_rgba(244,63,94,0.15)] flex flex-col items-center text-center" id="wizard-prompt">
+                    <i data-lucide="shield-alert" class="w-8 h-8 md:w-10 md:h-10 text-rose-500 mb-4 md:mb-5 animate-pulse"></i>
+                    <h3 class="text-sm md:text-base font-bold text-white mb-2 uppercase tracking-widest">GMP Exceeded</h3>
+                    <p class="text-[10px] md:text-xs text-zinc-400 leading-relaxed mb-6 md:mb-8">
+                        Specification exceeds project cap by <strong class="text-rose-400 font-mono" id="ui-breach-amt">0.0M</strong>. Margin geometry is unstable.
+                    </p>
+                    <button onclick="castValueEngineering()" class="w-full py-3 md:py-3.5 bg-emerald-500 text-black rounded-xl font-bold uppercase tracking-[0.2em] text-[9px] md:text-[10px] hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="cpu" class="w-3.5 h-3.5"></i> Engage Auto-VE Protocol
+                    </button>
+                </div>
+
+                <div class="hidden w-full flex flex-col items-center max-w-md" id="wizard-thinking">
+                    <div class="w-20 h-20 relative flex items-center justify-center mb-8">
+                        <div class="absolute inset-0 border-t-2 border-l-2 border-emerald-400 rounded-full animate-spin"></div>
+                        <div class="absolute inset-2 border-r-2 border-b-2 border-emerald-600 rounded-full animate-[spin_2s_linear_infinite_reverse]"></div>
+                        <i data-lucide="git-merge" class="w-6 h-6 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)]"></i>
+                    </div>
+                    <div class="w-full text-left space-y-4 font-mono text-[11px]" id="wizard-thinking-logs"></div>
+                </div>
+            </div>
+
+            <div id="overlay-compile" class="hidden absolute inset-0 z-30 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 md:p-8">
+                <div class="bg-[#030604] border border-emerald-500/30 p-6 md:p-10 rounded-3xl max-w-md w-full shadow-[0_0_50px_rgba(16,185,129,0.15)] flex flex-col items-center">
+                    <div class="w-20 h-20 relative flex items-center justify-center mb-8">
+                        <div class="absolute inset-0 border-t-2 border-emerald-400 rounded-full animate-spin"></div>
+                        <i data-lucide="box" class="w-6 h-6 text-emerald-400 emerald-glow"></i>
+                    </div>
+                    <div class="w-full text-left space-y-4 font-mono text-[11px]" id="compile-logs"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PILLAR 3: EXEC MATRIX & INTELLIGENCE HUB -->
+        <section class="w-full lg:w-1/4 flex flex-col gap-4 md:gap-6 min-h-[600px] lg:min-h-0 shrink-0 lg:shrink">
+            <div class="glass-panel rounded-3xl flex-1 flex flex-col min-h-0 border-emerald-500/20">
+                <div class="p-4 md:p-6 border-b border-emerald-900/30 shrink-0">
+                    <h2 class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-emerald-400 font-bold flex items-center gap-2">
+                        <i data-lucide="activity" class="w-3.5 h-3.5"></i> Estimator Co-Pilot
+                    </h2>
+                </div>
+                <div class="flex-1 scrollable p-4 md:p-6 space-y-3 min-h-0" id="copilot-feed"></div>
+            </div>
+
+            <div class="glass-panel rounded-3xl flex-[1.5] flex flex-col min-h-0 border-emerald-500/30 relative overflow-hidden">
+                <div class="p-4 md:p-6 border-b border-emerald-900/30 flex justify-between items-center shrink-0 bg-black/20">
+                    <h2 class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-emerald-400 font-bold flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> 03. Master BoQ
+                    </h2>
+                    <button id="btn-compile-side" onclick="executeNeuralCompile()" class="hidden md:block px-4 py-1.5 bg-emerald-500 text-black rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-emerald-400 transition-colors shadow-lg">
+                        Run Takeoff
+                    </button>
+                </div>
+                
+                <div id="pre-compile-state" class="flex-1 flex flex-col items-center justify-center p-6 md:p-8 text-center">
+                    <i data-lucide="calculator" class="w-8 h-8 md:w-10 md:h-10 text-emerald-900 mb-4"></i>
+                    <p class="text-[9px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Matrix Unlocked<br><br>Adjust parameters or click 'Run Takeoff' to generate official schedule.</p>
+                </div>
+
+                <div id="post-compile-state" class="hidden flex-1 flex flex-col min-h-0">
+                    <div class="grid grid-cols-2 gap-px bg-emerald-900/30 border-b border-emerald-900/30 shrink-0">
+                        <div class="bg-[#030604]/80 p-3 md:p-4">
+                            <div class="text-[7px] md:text-[8px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-1">Cost Efficiency</div>
+                            <div class="font-mono text-xs md:text-sm text-white" id="ui-cost-sqm">IDR 0 / m²</div>
+                        </div>
+                        <div class="bg-[#030604]/80 p-3 md:p-4">
+                            <div class="text-[7px] md:text-[8px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-1">VE Capital Saved</div>
+                            <div class="font-mono text-xs md:text-sm text-emerald-400" id="ui-ve-savings">IDR 0</div>
+                        </div>
+                        <div class="bg-[#030604]/80 p-3 md:p-4">
+                            <div class="text-[7px] md:text-[8px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-1">Timeline Risk</div>
+                            <div class="font-mono text-xs md:text-sm text-white">35 Nights (Locked)</div>
+                        </div>
+                        <div class="bg-[#030604]/80 p-3 md:p-4">
+                            <div class="text-[7px] md:text-[8px] uppercase tracking-[0.2em] text-zinc-500 font-bold mb-1">Fire Rating</div>
+                            <div class="font-mono text-xs md:text-sm text-emerald-400" id="ui-fire-rating">Class A</div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 md:p-4 border-b border-emerald-900/30 bg-[#010302] flex flex-col shrink-0">
+                        <div class="flex justify-between items-center mb-2 md:mb-3">
+                            <span class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-emerald-500 font-bold">Floorplan Topology</span>
+                            <span class="text-[8px] md:text-[9px] font-mono text-zinc-500" id="ui-mini-fp-area">260 sqm</span>
+                        </div>
+                        <div class="w-full h-20 md:h-24 border border-emerald-500/20 rounded-lg bg-blueprint relative p-2 flex gap-1.5 overflow-hidden">
+                            <div class="w-1/3 flex flex-col gap-1.5 z-10">
+                                <div class="flex-1 bg-emerald-900/30 border border-emerald-500/30 rounded-sm"></div>
+                                <div class="flex-1 bg-emerald-900/30 border border-emerald-500/30 rounded-sm"></div>
+                            </div>
+                            <div class="w-2/3 flex flex-col gap-1.5 z-10">
+                                <div class="flex-[2] bg-emerald-500/10 border border-emerald-500/30 rounded-sm flex items-center justify-center">
+                                    <i data-lucide="layers" class="w-3 h-3 md:w-4 md:h-4 text-emerald-500/50"></i>
+                                </div>
+                                <div class="flex-1 bg-zinc-900/50 border border-zinc-700/50 rounded-sm"></div>
+                            </div>
+                            <div class="absolute inset-x-0 h-[2px] bg-emerald-400 shadow-[0_0_10px_#10b981] animate-scanline-v opacity-50 z-20"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 min-h-0 overflow-y-auto scrollable p-2">
+                        <div class="space-y-1" id="boq-list"></div>
+                    </div>
+                </div>
+
+                <div class="p-4 md:p-6 border-t border-emerald-900/30 shrink-0 bg-black/40">
+                    <div class="flex justify-between items-center mb-4 md:mb-5">
+                        <span class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-zinc-500 font-bold">Guaranteed Price (GMP)</span>
+                        <span class="text-lg md:text-xl font-mono text-white emerald-glow font-medium" id="ui-final-price">IDR 600.0M</span>
+                    </div>
+                    <button id="btn-show-client" class="hidden w-full flex items-center justify-center gap-2 py-3 md:py-3.5 bg-white text-black rounded-xl font-bold uppercase tracking-widest text-[9px] md:text-[10px] hover:bg-zinc-200 transition-colors shadow-lg" onclick="toggleClientModal(true)">
+                        <i data-lucide="presentation" class="w-3.5 h-3.5"></i> Open Output Matrix
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CLIENT PRESENTATION MODAL -->
+    <div id="client-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-4 md:p-8 transition-opacity duration-300">
+        <div class="w-full max-w-6xl h-full max-h-[95vh] lg:max-h-[85vh] bg-[#020403] border border-emerald-500/30 rounded-2xl md:rounded-3xl shadow-[0_0_60px_rgba(16,185,129,0.15)] flex flex-col overflow-hidden relative">
+            
+            <div class="h-14 md:h-16 shrink-0 border-b border-emerald-900/50 flex items-center justify-between px-4 md:px-8 bg-black/50">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <i data-lucide="hexagon" class="w-4 h-4 md:w-4.5 md:h-4.5 text-emerald-500 animate-pulse-slow"></i>
+                    <h2 class="text-xs md:text-sm font-bold text-white tracking-wide uppercase">GreenShift Output Matrix</h2>
+                </div>
+                <button onclick="toggleClientModal(false)" class="text-zinc-500 hover:text-white transition-colors no-print">
+                    <i data-lucide="x" class="w-4 h-4 md:w-5 md:h-5"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 min-h-0 flex flex-col lg:flex-row bg-blueprint overflow-y-auto lg:overflow-hidden">
+                <!-- Left: Rendered Floorplan Mock-up -->
+                <div class="w-full lg:w-1/2 h-auto min-h-[400px] lg:h-full border-b lg:border-b-0 lg:border-r border-emerald-900/50 p-4 md:p-8 flex flex-col shrink-0 lg:min-h-0 no-print">
+                    <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-emerald-600 font-bold mb-3 md:mb-4 flex items-center gap-2 shrink-0">
+                        <i data-lucide="map" class="w-3 h-3 md:w-3.5 md:h-3.5"></i> Floorplan Topology
+                    </h3>
+                    
+                    <div class="flex-1 rounded-xl md:rounded-2xl overflow-hidden border border-emerald-500/30 relative bg-[#010302] flex items-center justify-center p-4 md:p-6 shadow-[inset_0_0_50px_rgba(16,185,129,0.1)] min-h-[300px] lg:min-h-0">
+                        <div class="absolute inset-0 bg-blueprint opacity-50"></div>
+                        
+                        <div class="relative w-full aspect-[4/3] max-h-full border-[2px] border-emerald-500/40 p-2 flex gap-2 z-10 bg-black/40">
+                            <!-- Private Suites -->
+                            <div class="w-1/3 flex flex-col gap-2">
+                                <div class="flex-1 border border-emerald-400/50 bg-emerald-900/20 relative group hover:bg-emerald-800/40 transition-colors flex items-center justify-center rounded-sm">
+                                    <div class="absolute top-1.5 left-1.5 md:top-2 md:left-2 flex items-center gap-1 md:gap-1.5">
+                                        <div class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-emerald-400 animate-pulse-slow"></div>
+                                        <span class="text-[5px] md:text-[7px] font-mono text-emerald-500 tracking-widest hidden sm:inline font-bold">SECURE</span>
+                                    </div>
+                                    <div class="text-[10px] md:text-xs font-bold text-white tracking-widest uppercase">Suite 01</div>
+                                </div>
+                                <div class="flex-1 border border-emerald-400/50 bg-emerald-900/20 relative group hover:bg-emerald-800/40 transition-colors flex items-center justify-center rounded-sm">
+                                    <div class="absolute top-1.5 left-1.5 md:top-2 md:left-2 flex items-center gap-1 md:gap-1.5">
+                                        <div class="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-emerald-400 animate-pulse-slow"></div>
+                                        <span class="text-[5px] md:text-[7px] font-mono text-emerald-500 tracking-widest hidden sm:inline font-bold">SECURE</span>
+                                    </div>
+                                    <div class="text-[10px] md:text-xs font-bold text-white tracking-widest uppercase">Suite 02</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Open Hub & Utility -->
+                            <div class="w-2/3 flex flex-col gap-2">
+                                <div class="flex-[2.5] border border-emerald-500/30 bg-emerald-500/10 relative flex items-center justify-center overflow-hidden rounded-sm">
+                                    <div class="absolute top-0 right-0 w-10 h-10 md:w-16 md:h-16 border-l border-b border-emerald-500/20"></div>
+                                    <div class="absolute bottom-0 left-0 w-10 h-10 md:w-16 md:h-16 border-r border-t border-emerald-500/20"></div>
+                                    
+                                    <div class="text-[6px] md:text-[8px] font-mono text-emerald-500 absolute top-1.5 left-1.5 md:top-2 md:left-2 tracking-widest hidden sm:block font-bold">COLLABORATION</div>
+                                    <div class="flex flex-col items-center gap-1 md:gap-2 z-10">
+                                        <i data-lucide="network" class="w-4 h-4 md:w-6 md:h-6 text-emerald-400/50"></i>
+                                        <div class="text-[10px] md:text-sm font-bold text-white tracking-widest uppercase text-center">Innovation Hub</div>
+                                    </div>
+                                </div>
+                                <div class="flex-1 border border-zinc-700/50 bg-zinc-900/40 relative flex items-center justify-center rounded-sm">
+                                    <div class="text-[8px] font-mono text-zinc-500 absolute top-1.5 left-1.5 md:top-2 md:left-2 tracking-widest hidden sm:block">UTILITY</div>
+                                    <div class="text-[9px] md:text-xs font-bold text-zinc-300 tracking-widest uppercase">Pantry</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dynamic Overlay Tags -->
+                            <div class="absolute -top-2 -right-2 md:-top-3 md:-right-3 bg-emerald-500 text-black text-[7px] md:text-[9px] font-bold px-2 py-1 md:px-3 md:py-1.5 rounded uppercase tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.4)] z-30" id="modal-fp-wall">
+                                Fjäll 20cm
+                            </div>
+                            <div class="absolute -bottom-2 -left-2 md:-bottom-3 md:-left-3 bg-[#010302] border border-emerald-500/50 text-emerald-400 text-[7px] md:text-[9px] font-bold px-2 py-1 md:px-3 md:py-1.5 rounded uppercase tracking-widest z-30 shadow-[0_0_10px_rgba(0,0,0,0.8)]" id="modal-fp-render">
+                                Gypsum
+                            </div>
+                        </div>
+
+                        <!-- Scanner Animation -->
+                        <div class="absolute inset-x-0 w-full h-[2px] bg-emerald-400 shadow-[0_0_15px_#10b981] animate-scanline-v opacity-40 z-20"></div>
+
+                        <div class="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex justify-between items-end z-30 pointer-events-none">
+                           <div>
+                               <div class="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-emerald-500 font-bold mb-0.5 md:mb-1">Topology</div>
+                               <div class="text-sm md:text-xl font-light text-white" id="modal-fp-title">Garuda Spark Hub</div>
+                           </div>
+                           <div class="text-right">
+                               <div class="text-[8px] md:text-[10px] uppercase tracking-[0.2em] text-emerald-500 font-bold mb-0.5 md:mb-1">Footprint</div>
+                               <div class="text-sm md:text-xl font-mono text-white" id="modal-fp-area">0.0 m²</div>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: The Official Document (Preview) -->
+                <div class="w-full lg:w-1/2 h-auto lg:h-full p-4 md:p-8 flex flex-col bg-zinc-100 relative shrink-0 lg:min-h-0">
+                    <h3 class="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-bold mb-3 md:mb-4 flex items-center gap-2 shrink-0 no-print">
+                        <i data-lucide="file-text" class="w-3 h-3 md:w-3.5 md:h-3.5"></i> Official Output
+                    </h3>
+                    
+                    <div class="flex-1 bg-white rounded-lg shadow-xl border border-zinc-200 p-4 md:p-8 scrollable flex flex-col relative overflow-y-auto lg:min-h-0 text-zinc-900">
+                        <div class="border-b-2 border-emerald-600 pb-3 md:pb-4 mb-4 md:mb-6 flex justify-between items-end shrink-0">
+                            <div>
+                                <div class="text-lg md:text-2xl font-bold tracking-tight">GreenShift Studio</div>
+                                <div class="text-[7px] md:text-[9px] uppercase tracking-widest text-zinc-500 font-bold mt-1">Generative BoQ Document</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-[10px] md:text-xs font-bold" id="modal-doc-title">Garuda Spark Hub</div>
+                                <div class="text-[8px] md:text-[10px] text-zinc-500 mt-1" id="modal-doc-loc">FX Sudirman, Jakarta</div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 overflow-x-auto">
+                            <table class="w-full text-left text-[9px] md:text-xs mb-4 md:mb-8 min-w-[300px]">
+                                <thead class="border-b border-zinc-200 text-zinc-500 font-semibold">
+                                    <tr>
+                                        <th class="py-2 font-bold px-2 md:px-4 text-[10px] uppercase tracking-wider">Description</th>
+                                        <th class="py-2 font-bold text-center px-2 md:px-4 text-[10px] uppercase tracking-wider">Qty</th>
+                                        <th class="py-2 font-bold text-right px-2 md:px-4 text-[10px] uppercase tracking-wider">Total (IDR)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-zinc-100" id="modal-boq-body"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="border-t-2 border-zinc-900 pt-3 md:pt-4 flex justify-between items-center shrink-0 mt-4 md:mt-0">
+                            <div class="text-[8px] md:text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Guaranteed Max Price</div>
+                            <div class="text-sm md:text-lg font-bold text-emerald-700 tracking-tight" id="modal-total-price">IDR 600.0M</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 md:mt-6 flex justify-end gap-3 md:gap-4 shrink-0 no-print">
+                        <button onclick="exportCSV()" class="flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-zinc-200 text-zinc-800 rounded-lg text-[9px] md:text-xs font-bold hover:bg-zinc-300 transition-all">
+                            <i data-lucide="download" class="w-3 h-3 md:w-3.5 md:h-3.5"></i> CSV
+                        </button>
+                        <button onclick="triggerPrintPDF()" class="flex items-center gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 bg-emerald-600 text-white rounded-lg text-[9px] md:text-xs font-bold shadow-lg hover:bg-emerald-700 transition-all">
+                            <i data-lucide="printer" class="w-3 h-3 md:w-3.5 md:h-3.5"></i> Print PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN BULLETPROOF PRINT CANVAS -->
+    <div id="print-canvas" class="hidden"></div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // Database
+        const VectorDB = {
+            fjallCore: {
+                thickness: [
+                    { id: 'FJ-10', name: '10cm Interior Partition', cost: 350000, stc: 38, rValue: 2.5, weight: 12, footMul: 0.10, visualZ: 10, fire: 'Class A' },
+                    { id: 'FJ-15', name: '15cm Demising Wall', cost: 500000, stc: 45, rValue: 3.8, weight: 16, footMul: 0.15, visualZ: 25, fire: 'Class A' },
+                    { id: 'FJ-20', name: '20cm Acoustic Suite', cost: 700000, stc: 54, rValue: 5.0, weight: 20, footMul: 0.20, visualZ: 40, fire: 'Class A+' },
+                    { id: 'FJ-25', name: '25cm Exterior Grade', cost: 950000, stc: 62, rValue: 6.5, weight: 25, footMul: 0.25, visualZ: 55, fire: 'Class A+' },
+                ],
+                renders: [
+                    { id: 'RND-RAW', name: 'Raw EPS Finish', cost: 0, stcBonus: 0, color: 'bg-zinc-800', txt: 'text-white/30' },
+                    { id: 'RND-GYP', name: 'Gypsum Skim Coat', cost: 150000, stcBonus: 2, color: 'bg-zinc-200', txt: 'text-black/50' },
+                    { id: 'RND-SLT', name: 'Acoustic Slats', cost: 450000, stcBonus: 8, color: 'bg-amber-900/50', txt: 'text-white/50' },
+                ]
+            },
+            materials: {
+                transparencies: [
+                    { id: 'GL-TMP-12', name: 'Tempered Glass (12mm)', cost: 850000, isVE: false },
+                    { id: 'AC-CST-12', name: 'Cast Acrylic (12mm)', cost: 550000, isVE: true },
+                ],
+                floors: [
+                    { id: 'FL-VNL-02', name: 'Commercial Vinyl', cost: 190000 },
+                    { id: 'FL-CPT-05', name: 'Carpet Tiles', cost: 250000 },
+                ],
+                ceilings: [
+                    { id: 'CL-DRP-09', name: 'Gypsum Drop Ceiling', cost: 215000, isVE: false },
+                    { id: 'CL-EXP-00', name: 'Exposed Industrial', cost: 95000, isVE: true },
+                ]
+            },
+            fixedCosts: { prelimsNight: 54160000, mepStandard: 50350000, finishesStandard: 24000000 }
+        };
+
+        // State
+        const state = {
+            appMode: 'engineering',
+            role: 'architect', // architect, director, executive
+            intent: { name: 'Garuda Spark Hub', location: 'FX Sudirman, Jakarta', area: 260, wallArea: 162, glassArea: 66, wallLinear: 64, cap: 600000000, marginTarget: 30, nightShift: true },
+            config: {
+                thickness: VectorDB.fjallCore.thickness[2],
+                render: VectorDB.fjallCore.renders[1],
+                trans: VectorDB.materials.transparencies[0],
+                floor: VectorDB.materials.floors[0],
+                ceil: VectorDB.materials.ceilings[0]
+            },
+            telemetry: { totalInternal: 0, requiredRevenue: 0, netProfit: 0, netMargin: 0, isOverBudget: false, deficit: 0, usableSqm: 0, veSavings: 0 },
+            finalBoq: [],
+            copilotLogs: []
+        };
+
+        const formatShortIDR = (num) => (num / 1000000).toFixed(1) + 'M';
+        const formatIDR = (num) => new Intl.NumberFormat('id-ID').format(num);
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.innerText = text; }
+        function safeSetClass(id, className) { const el = document.getElementById(id); if (el) el.className = className; }
+        function safeSetStyle(id, prop, val) { const el = document.getElementById(id); if (el) el.style[prop] = val; }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // Google Cinematic Boot Sequence
+            const bootTitle = document.getElementById('boot-title');
+            const bootSub = document.getElementById('boot-subtitle');
+            const progress = document.getElementById('boot-progress');
+            const googleDots = document.getElementById('google-dots-container');
+            const sparkle = document.getElementById('magic-sparkle');
+            
+            // Phase 1: Dancing (Already active via CSS)
+            
+            // Phase 2: Form Wand
+            setTimeout(() => {
+                if (googleDots) {
+                    googleDots.classList.remove('loader-phase-1');
+                    googleDots.classList.add('loader-phase-2');
+                }
+            }, 1200);
+
+            // Phase 3: EPS Burst & Title Reveal
+            setTimeout(() => {
+                if (googleDots) {
+                    googleDots.classList.remove('loader-phase-2');
+                    googleDots.classList.add('loader-phase-3');
+                }
+                if (sparkle) {
+                    sparkle.style.opacity = '1';
+                    sparkle.style.transform = 'scale(1.2) rotate(45deg)';
+                }
+                
+                if (bootTitle) { bootTitle.style.opacity = '1'; bootTitle.style.transform = 'translateY(0)'; }
+                if (bootSub) bootSub.style.opacity = '1';
+                if (progress) progress.style.width = '100%';
+            }, 2400);
+
+            // Clean Up
+            setTimeout(() => {
+                const loader = document.getElementById('boot-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    loader.style.transform = 'scale(1.05)';
+                    setTimeout(() => loader.style.display = 'none', 1000);
+                }
+                addCopilotLog('info', 'Wizard System Online. Ready for parametric synthesis.');
+            }, 4000);
+
+            renderMaterialSelectors();
+            synthesize();
+        });
+
+        // Role Management Logic
+        async function switchRole(newRole) {
+            state.role = newRole;
+            addCopilotLog('sys', `Role Switched: ${newRole.toUpperCase()}`);
+            
+            const inputControls = document.getElementById('input-controls');
+            const sandboxArea = document.getElementById('sandbox-area');
+            const iconLockIntent = document.getElementById('icon-lock-intent');
+            const iconLockSandbox = document.getElementById('icon-lock-sandbox');
+            const sliders = document.querySelectorAll('input[type=range]');
+
+            // Reset to defaults first
+            inputControls.classList.remove('pointer-events-none', 'opacity-50');
+            sandboxArea.classList.remove('pointer-events-none', 'opacity-50');
+            iconLockIntent.classList.add('hidden');
+            iconLockSandbox.classList.add('hidden');
+            sliders.forEach(s => s.disabled = false);
+
+            if (newRole === 'architect') {
+                if (state.appMode === 'locked') resetEngine();
+                // Full Access
+            } 
+            else if (newRole === 'director') {
+                if (state.appMode === 'locked') resetEngine();
+                // Can only edit intent
+                sandboxArea.classList.add('pointer-events-none', 'opacity-50');
+                iconLockSandbox.classList.remove('hidden');
+                addCopilotLog('info', 'Director Mode: Parametric Sandbox locked. Edit scope bounds.');
+            } 
+            else if (newRole === 'executive') {
+                // View Only - Force Compile
+                inputControls.classList.add('pointer-events-none', 'opacity-50');
+                sandboxArea.classList.add('pointer-events-none', 'opacity-50');
+                iconLockIntent.classList.remove('hidden');
+                iconLockSandbox.classList.remove('hidden');
+                sliders.forEach(s => s.disabled = true);
+                
+                if (state.appMode !== 'locked') {
+                    await executeNeuralCompile();
+                }
+                addCopilotLog('info', 'Executive Mode: Editing locked. Viewing final output matrix.');
+            }
+        }
+
+        // Co-Pilot Feed
+        function addCopilotLog(type, text) {
+            const feed = document.getElementById('copilot-feed');
+            if (!feed) return;
+            
+            const color = type === 'alert' ? 'text-rose-300 bg-rose-500/10 border-rose-500/20' : 
+                          type === 'success' ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20' : 
+                          type === 'magic' ? 'text-emerald-400 bg-emerald-900/20 border-emerald-400/30' :
+                          'text-emerald-100/60 bg-emerald-900/10 border-emerald-900/30';
+            
+            const icon = type === 'alert' ? '<i data-lucide="alert-triangle" class="inline w-3 h-3 mr-1.5 -mt-0.5 text-rose-500"></i>' : 
+                         type === 'success' ? '<i data-lucide="check-circle-2" class="inline w-3 h-3 mr-1.5 -mt-0.5 text-emerald-400"></i>' : 
+                         type === 'magic' ? '<i data-lucide="wand-sparkles" class="inline w-3 h-3 mr-1.5 -mt-0.5 text-emerald-400"></i>' : '';
+
+            feed.innerHTML += `
+                <div class="p-2.5 rounded-lg border text-[10px] font-mono leading-relaxed fade-in ${color}">
+                    ${icon}${text}
+                </div>
+            `;
+            lucide.createIcons();
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        // Sliders Update
+        function updateIntent(key, value) {
+            if (state.appMode !== 'engineering') return;
+            state.intent[key] = Number(value);
+            safeSetText(`ui-${key}-val`, key === 'cap' ? formatShortIDR(value) : value + ' sqm');
+            synthesize();
+        }
+
+        function toggleNightShift() {
+            if (state.appMode !== 'engineering') return;
+            state.intent.nightShift = !state.intent.nightShift;
+            
+            if (state.intent.nightShift) {
+                safeSetClass('btn-nightshift', "active-panel p-3 md:p-4 rounded-2xl flex flex-col items-center justify-center text-center");
+                safeSetText('ui-night-val', "Active");
+                safeSetClass('ui-night-val', "text-[10px] md:text-xs font-bold uppercase tracking-widest text-emerald-400");
+                addCopilotLog('info', 'Night shift enabled. Labor multiplier set to 1.4x.');
+            } else {
+                safeSetClass('btn-nightshift', "bg-emerald-900/10 border border-emerald-900/30 p-3 md:p-4 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-emerald-500/30 transition-colors");
+                safeSetText('ui-night-val', "Off");
+                safeSetClass('ui-night-val', "text-[10px] md:text-xs font-bold uppercase tracking-widest text-zinc-500");
+                addCopilotLog('info', 'Night shift disabled. Reverting to standard labor rates.');
+            }
+            synthesize();
+        }
+
+        // Material Selection
+        function setMaterial(cat, id) {
+            if (state.appMode !== 'engineering') return;
+            let item;
+            if(cat==='thickness') item = VectorDB.fjallCore.thickness.find(x=>x.id===id);
+            else if(cat==='render') item = VectorDB.fjallCore.renders.find(x=>x.id===id);
+            else if(cat==='trans') item = VectorDB.materials.transparencies.find(x=>x.id===id);
+            else if(cat==='floor') item = VectorDB.materials.floors.find(x=>x.id===id);
+            else if(cat==='ceil') item = VectorDB.materials.ceilings.find(x=>x.id===id);
+            
+            state.config[cat] = item;
+            renderMaterialSelectors();
+            synthesize();
+            
+            if(cat==='thickness' || cat==='render') {
+                addCopilotLog('info', `Fjäll Core updated: ${state.config.thickness.name} w/ ${state.config.render.name}. Re-calculating thermals and acoustics.`);
+            }
+        }
+
+        // Render Material Selector Grid
+        function renderMaterialSelectors() {
+            const container = document.getElementById('materials-grid');
+            if (!container) return;
+
+            let html = '';
+
+            // Fjall Core Configuration Stack
+            html += `
+            <div class="col-span-1 md:col-span-2">
+                <div class="text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-emerald-500 font-bold mb-3 flex items-center gap-2">
+                    <i data-lucide="layers" class="w-3 h-3"></i> Fjäll EPS Core Matrix
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <div class="text-[7px] md:text-[8px] uppercase tracking-widest text-zinc-500 mb-1">Structural Thickness</div>
+                        ${VectorDB.fjallCore.thickness.map(m => {
+                            const isActive = state.config.thickness.id === m.id;
+                            const cssClass = isActive ? 'active-panel border-emerald-500/50' : 'bg-emerald-900/10 border border-emerald-900/30 hover:border-emerald-500/30';
+                            const txtClass = isActive ? 'text-white font-medium' : 'text-zinc-400';
+                            return `
+                            <div onclick="setMaterial('thickness', '${m.id}')" class="p-2.5 md:p-3 rounded-xl cursor-pointer transition-all flex justify-between items-center ${cssClass}">
+                                <div>
+                                    <div class="text-[10px] md:text-[11px] font-mono ${txtClass}">${m.name}</div>
+                                    <div class="text-[7px] md:text-[8px] text-zinc-500 font-mono mt-0.5">Fire: ${m.fire} | ${m.weight}kg/m²</div>
+                                </div>
+                                ${isActive ? '<i data-lucide="check-circle-2" class="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-400"></i>' : ''}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    <div class="space-y-2">
+                        <div class="text-[7px] md:text-[8px] uppercase tracking-widest text-zinc-500 mb-1">Architectural Render</div>
+                        ${VectorDB.fjallCore.renders.map(m => {
+                            const isActive = state.config.render.id === m.id;
+                            const cssClass = isActive ? 'active-panel border-emerald-500/50' : 'bg-emerald-900/10 border border-emerald-900/30 hover:border-emerald-500/30';
+                            const txtClass = isActive ? 'text-white font-medium' : 'text-zinc-400';
+                            return `
+                            <div onclick="setMaterial('render', '${m.id}')" class="p-2.5 md:p-3 rounded-xl cursor-pointer transition-all flex justify-between items-center ${cssClass}">
+                                <span class="text-[10px] md:text-[11px] font-mono ${txtClass}">${m.name}</span>
+                                ${isActive ? '<i data-lucide="check-circle-2" class="w-3 h-3 md:w-3.5 md:h-3.5 text-emerald-400"></i>' : ''}
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+            `;
+
+            const cats = [
+                { title: "Transparencies", data: VectorDB.materials.transparencies, key: 'trans' },
+                { title: "Flooring System", data: VectorDB.materials.floors, key: 'floor' },
+                { title: "Ceiling Finish", data: VectorDB.materials.ceilings, key: 'ceil' },
+            ];
+
+            html += `<div class="col-span-1 md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-emerald-900/30 mt-2">`;
+            cats.forEach(c => {
+                html += `<div class="flex flex-col gap-2">
+                    <div class="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-zinc-500 font-semibold mb-1">${c.title}</div>
+                    <div class="grid grid-cols-1 gap-2">`;
+                
+                c.data.forEach(m => {
+                    const isActive = state.config[c.key].id === m.id;
+                    const cssClass = isActive ? 'active-panel border-emerald-500/50' : 'bg-emerald-900/10 border border-transparent hover:border-emerald-900/50';
+                    const txtClass = isActive ? 'text-white font-medium' : 'text-zinc-500';
+                    const icon = isActive ? `<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>` : '';
+                    
+                    html += `
+                        <div onclick="setMaterial('${c.key}', '${m.id}')" class="px-3 py-2.5 rounded-xl cursor-pointer transition-all flex justify-between items-center ${cssClass}">
+                            <span class="text-[9px] md:text-[10px] font-mono ${txtClass}">${m.name}</span>
+                            ${icon}
+                        </div>`;
+                });
+                html += `</div></div>`;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+            lucide.createIcons();
+            updateTwin();
+        }
+
+        function updateTwin() {
+            const thickness = state.config.thickness;
+            const render = state.config.render;
+
+            // Generate Volumetric EPS Density Slices
+            const slicesContainer = document.getElementById('holo-eps-slices');
+            if (slicesContainer) {
+                let slicesHTML = '';
+                const sliceCount = Math.floor(thickness.visualZ / 5); 
+                for(let i = 1; i <= sliceCount; i++) {
+                    const zPos = i * 5;
+                    const isTop = i === sliceCount;
+                    const opacity = isTop ? '1' : '0.4';
+                    const borderClass = isTop ? 'border-emerald-400/60 shadow-[inset_0_0_20px_rgba(16,185,129,0.3)]' : 'border-emerald-500/20';
+                    slicesHTML += `<div class="holo-layer eps-pattern ${borderClass}" style="transform: translateZ(${zPos}px); opacity: ${opacity};"></div>`;
+                }
+                slicesContainer.innerHTML = slicesHTML;
+            }
+
+            const renderZ = thickness.visualZ + 15;
+            safeSetClass('holo-render', `holo-layer ${render.color} border border-white/20 shadow-[0_15px_40px_rgba(0,0,0,0.8)] flex items-center justify-center transition-all duration-[800ms]`);
+            safeSetStyle('holo-render', 'transform', `translateZ(${renderZ}px)`);
+            safeSetClass('holo-render-text', `${render.txt} font-mono text-[8px] md:text-[10px] font-bold rotate-[-45deg] uppercase tracking-widest drop-shadow-md`);
+            safeSetText('holo-render-text', render.name);
+
+            safeSetText('ui-stc', `${thickness.stc + render.stcBonus} dB`);
+            safeSetText('ui-rval', `R-${thickness.rValue.toFixed(1)}`);
+        }
+
+        function calcCosts(tempConfig) {
+            const wCost = (tempConfig.thickness.cost + tempConfig.render.cost) * state.intent.wallArea;
+            const archBase = wCost + (tempConfig.trans.cost * state.intent.glassArea) + 
+                             (tempConfig.floor.cost * state.intent.area) + 
+                             (tempConfig.ceil.cost * state.intent.area) + VectorDB.fixedCosts.finishesStandard;
+            const totalBase = archBase + VectorDB.fixedCosts.prelimsNight + VectorDB.fixedCosts.mepStandard;
+            
+            const labMul = state.intent.nightShift ? 0.40 : 0.25; 
+            const archLab = archBase * labMul;
+            const totalInt = totalBase + archLab;
+            
+            const reqRev = totalInt / (1 - (state.intent.marginTarget / 100));
+            return { totalInt, reqRev };
+        }
+
+        // Synthesize Math Logic
+        function synthesize() {
+            const costs = calcCosts(state.config);
+            const profit = costs.reqRev - costs.totalInt;
+            
+            state.telemetry.usableSqm = state.intent.area - (state.intent.wallLinear * state.config.thickness.footMul);
+            state.telemetry.isOverBudget = costs.reqRev > state.intent.cap;
+            state.telemetry.deficit = costs.reqRev > state.intent.cap ? costs.reqRev - state.intent.cap : 0;
+            
+            state.telemetry.totalInternal = costs.totalInt;
+            state.telemetry.requiredRevenue = costs.reqRev;
+            state.telemetry.netProfit = profit;
+
+            safeSetText('ui-usable', state.telemetry.usableSqm.toFixed(1));
+            safeSetText('ui-mini-fp-area', state.telemetry.usableSqm.toFixed(1) + ' m²');
+            safeSetText('ui-req-rev', `IDR ${formatShortIDR(costs.reqRev)}`);
+            safeSetClass('ui-req-rev', `font-mono text-base md:text-lg font-bold transition-colors ${state.telemetry.isOverBudget && state.appMode==='engineering' ? 'text-rose-400 rose-glow' : 'text-white'}`);
+            
+            safeSetStyle('ui-progress-bar', 'width', `${Math.min((costs.reqRev / state.intent.cap) * 100, 100)}%`);
+            safeSetClass('ui-progress-bar', `h-full transition-all duration-300 ${state.telemetry.isOverBudget && state.appMode==='engineering' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`);
+
+            safeSetText('ui-net-profit', `IDR ${formatShortIDR(profit)}`);
+            
+            if(state.appMode === 'engineering') {
+                const overlay = document.getElementById('overlay-wizard');
+                if(state.telemetry.isOverBudget) {
+                    if (overlay) overlay.classList.remove('hidden');
+                    safeSetText('ui-breach-amt', formatShortIDR(state.telemetry.deficit));
+                } else {
+                    if (overlay) overlay.classList.add('hidden');
+                }
+            }
+        }
+
+        // Value Engineering Speeds
+        async function castValueEngineering() {
+            const prompt = document.getElementById('wizard-prompt');
+            const thinking = document.getElementById('wizard-thinking');
+            if (prompt) prompt.classList.add('hidden');
+            if (thinking) thinking.classList.remove('hidden');
+            
+            const logBox = document.getElementById('wizard-thinking-logs');
+            if (logBox) logBox.innerHTML = '';
+            
+            const appendLog = (type, txt) => {
+                if (!logBox) return;
+                const color = type === 'alert' ? 'text-rose-400' : type==='magic' ? 'text-emerald-400' : 'text-zinc-500';
+                const prefix = type === 'alert' ? '[WARN]' : type === 'magic' ? '[VE]' : '[SYS]';
+                logBox.innerHTML += `<div class="fade-in"><span class="${color} mr-2 font-bold">${prefix}</span><span class="text-white">${txt}</span></div>`;
+            };
+
+            const originalCost = calcCosts(state.config).reqRev;
+
+            appendLog('sys', 'Algorithmic Value Engineering Protocol engaged.');
+            await sleep(600);
+            appendLog('alert', `Budget breached by ${formatShortIDR(state.telemetry.deficit)}. Resolving parameters...`);
+            await sleep(800);
+            
+            let activeConfig = { ...state.config };
+
+            if(!activeConfig.trans.isVE) {
+                await sleep(600);
+                appendLog('magic', 'Substituting Tempered Glass -> Cast Acrylic.');
+                activeConfig.trans = VectorDB.materials.transparencies.find(t=>t.isVE);
+                state.config = activeConfig;
+                renderMaterialSelectors(); synthesize();
+            }
+
+            if(state.telemetry.isOverBudget && !activeConfig.ceil.isVE) {
+                await sleep(800);
+                appendLog('magic', 'Substituting Drop Ceiling -> Exposed Industrial.');
+                activeConfig.ceil = VectorDB.materials.ceilings.find(t=>t.isVE);
+                state.config = activeConfig;
+                renderMaterialSelectors(); synthesize();
+            }
+
+            if(state.telemetry.isOverBudget && activeConfig.render.id === 'RND-SLT') {
+                await sleep(800);
+                appendLog('magic', 'Substituting Acoustic Slats -> Gypsum Coat.');
+                activeConfig.render = VectorDB.fjallCore.renders.find(t=>t.id==='RND-GYP');
+                state.config = activeConfig;
+                renderMaterialSelectors(); synthesize();
+            }
+
+            const newCost = calcCosts(state.config).reqRev;
+            state.telemetry.veSavings = originalCost - newCost;
+
+            await sleep(800);
+            appendLog('sys', 'Parameters stabilized. Margin mathematically locked.');
+            addCopilotLog('magic', 'Automated Value Engineering resolved successfully.');
+            await sleep(1500);
+            
+            const overlay = document.getElementById('overlay-wizard');
+            if (overlay) overlay.classList.add('hidden');
+            if (prompt) prompt.classList.remove('hidden');
+            if (thinking) thinking.classList.add('hidden');
+        }
+
+        // Takeoff Assembly
+        async function executeNeuralCompile() {
+            state.appMode = 'compiling';
+            const compileOverlay = document.getElementById('overlay-compile');
+            const btnCompile = document.getElementById('btn-compile');
+            const btnCompileSide = document.getElementById('btn-compile-side');
+            
+            if (compileOverlay) compileOverlay.classList.remove('hidden');
+            if (btnCompile) btnCompile.classList.add('hidden'); 
+            if (btnCompileSide) btnCompileSide.classList.add('hidden'); 
+
+            const logBox = document.getElementById('compile-logs');
+            if (logBox) logBox.innerHTML = '';
+            
+            const appendLog = (type, txt) => {
+                if (!logBox) return;
+                const color = type === 'alert' ? 'text-rose-400' : type==='success' ? 'text-emerald-400' : 'text-zinc-500';
+                const prefix = type === 'alert' ? '[WARN]' : type === 'success' ? '[PASS]' : '[SYS]';
+                logBox.innerHTML += `<div class="fade-in"><span class="${color} mr-2 font-bold">${prefix}</span><span class="text-white">${txt}</span></div>`;
+            };
+
+            addCopilotLog('info', 'Commencing Automated Takeoff...');
+            appendLog('sys', 'Initializing Parametric BIM Synthesis...');
+            await sleep(600);
+            appendLog('sys', `Analyzing Load: ${state.intent.wallArea}sqm Fjäll ${state.config.thickness.name}`);
+            await sleep(800);
+
+            if(state.telemetry.isOverBudget) {
+                appendLog('alert', `CAPACITY BREACH DETECTED.`);
+                await sleep(800);
+                appendLog('sys', `Executing VE Protocol...`);
+                await castValueEngineering(); 
+                appendLog('success', 'Budget Neutralized.');
+            } else {
+                appendLog('success', 'Synthesis validated against target cap.');
+            }
+
+            await sleep(800);
+            appendLog('sys', 'Generating Executive Master BoQ...');
+            await sleep(1000);
+
+            const fjallCost = state.config.thickness.cost + state.config.render.cost;
+            const rawBoq = [
+                { id: 'PR-MOB', cat: 'Site Ops', desc: 'Mobilization & Logistics', total: VectorDB.fixedCosts.prelimsNight, qty: 1, unit: 'Lot' },
+                { id: state.config.thickness.id, cat: 'Architecture', desc: `Fjäll Core (${state.config.thickness.name} + ${state.config.render.name})`, total: fjallCost * state.intent.wallArea, qty: state.intent.wallArea, unit: 'Sqm', hl: true },
+                { id: state.config.trans.id, cat: 'Glazing', desc: state.config.trans.name, total: state.config.trans.cost * state.intent.glassArea, qty: state.intent.glassArea, unit: 'Sqm' },
+                { id: state.config.floor.id, cat: 'Finishes', desc: state.config.floor.name, total: state.config.floor.cost * state.intent.area, qty: state.intent.area, unit: 'Sqm' },
+                { id: state.config.ceil.id, cat: 'Finishes', desc: state.config.ceil.name, total: state.config.ceil.cost * state.intent.area, qty: state.intent.area, unit: 'Sqm' },
+                { id: 'FN-MNC', cat: 'Finishes', desc: 'Monochrome Painting', total: VectorDB.fixedCosts.finishesStandard, qty: 1, unit: 'Lot' },
+                { id: 'ME-SYS', cat: 'MEP', desc: 'Electrical & AC Routing', total: VectorDB.fixedCosts.mepStandard, qty: 1, unit: 'Lot' }
+            ];
+
+            const rawTotal = rawBoq.reduce((a,b) => a+b.total, 0);
+            state.finalBoq = rawBoq.map(item => ({ ...item, billed: Math.round((item.total / rawTotal) * state.intent.cap) }));
+
+            state.appMode = 'locked';
+            if (compileOverlay) compileOverlay.classList.add('hidden');
+            
+            // Lock UI elements
+            const inputControls = document.getElementById('input-controls');
+            const sandboxArea = document.getElementById('sandbox-area');
+            const iconLockIntent = document.getElementById('icon-lock-intent');
+            const iconLockSandbox = document.getElementById('icon-lock-sandbox');
+            
+            if (inputControls) inputControls.classList.add('pointer-events-none', 'opacity-50');
+            if (sandboxArea) sandboxArea.classList.add('pointer-events-none', 'opacity-50');
+            if (iconLockIntent) iconLockIntent.classList.remove('hidden');
+            if (iconLockSandbox) iconLockSandbox.classList.remove('hidden');
+            
+            const sliders = document.querySelectorAll('input[type=range]');
+            sliders.forEach(s => s.disabled = true);
+            
+            const btnUnlock = document.getElementById('btn-unlock');
+            const btnShowClient = document.getElementById('btn-show-client');
+            if (btnUnlock) btnUnlock.classList.remove('hidden');
+            if (btnShowClient) btnShowClient.classList.remove('hidden');
+            
+            // Switch CEO Hub views
+            const preCompile = document.getElementById('pre-compile-state');
+            const postCompile = document.getElementById('post-compile-state');
+            if (preCompile) preCompile.classList.add('hidden');
+            if (postCompile) postCompile.classList.remove('hidden');
+            
+            addCopilotLog('success', 'Quantity Takeoff complete. Master Matrix locked.');
+            
+            renderCEOBoQ();
+        }
+
+        function resetEngine() {
+            state.appMode = 'engineering';
+            
+            // Re-apply role restrictions
+            switchRole(state.role);
+
+            const btnUnlock = document.getElementById('btn-unlock');
+            const btnShowClient = document.getElementById('btn-show-client');
+            const btnCompile = document.getElementById('btn-compile');
+            const btnCompileSide = document.getElementById('btn-compile-side');
+            if (btnUnlock) btnUnlock.classList.add('hidden');
+            if (btnShowClient) btnShowClient.classList.add('hidden');
+            if (btnCompile) btnCompile.classList.remove('hidden');
+            if (btnCompileSide) btnCompileSide.classList.remove('hidden');
+            
+            const preCompile = document.getElementById('pre-compile-state');
+            const postCompile = document.getElementById('post-compile-state');
+            if (preCompile) preCompile.classList.remove('hidden');
+            if (postCompile) postCompile.classList.add('hidden');
+            
+            addCopilotLog('info', 'Matrix unlocked. Returning to Parametric Editor.');
+            synthesize();
+        }
+
+        // Render CEO Hub Data
+        function renderCEOBoQ() {
+            const costPerSqm = state.telemetry.totalInternal / state.intent.area;
+            safeSetText('ui-cost-sqm', `IDR ${(costPerSqm/1000000).toFixed(2)}M / m²`);
+            
+            if(state.telemetry.veSavings > 0) {
+                safeSetText('ui-ve-savings', `IDR ${formatShortIDR(state.telemetry.veSavings)}`);
+                safeSetClass('ui-ve-savings', "font-mono text-[10px] md:text-xs text-emerald-400");
+            } else {
+                safeSetText('ui-ve-savings', `None`);
+                safeSetClass('ui-ve-savings', "font-mono text-[10px] md:text-xs text-zinc-500");
+            }
+            
+            safeSetText('ui-fire-rating', state.config.thickness.fire);
+
+            const list = document.getElementById('boq-list');
+            if (!list) return;
+            
+            let html = '';
+            state.finalBoq.forEach(item => {
+                const bg = item.hl ? 'bg-emerald-500/10 border border-emerald-500/20' : 'hover:bg-emerald-900/10 border border-transparent';
+                const hlBadge = item.hl ? `<span class="text-[6px] md:text-[8px] bg-emerald-500 text-black px-1.5 py-0.5 rounded-sm uppercase tracking-widest font-bold ml-2">Core</span>` : '';
+                html += `
+                    <div class="p-2 md:p-3 rounded-lg flex flex-col gap-1 transition-colors ${bg}">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[9px] md:text-[11px] font-bold text-white leading-tight pr-2 md:pr-4">${item.desc} ${hlBadge}</span>
+                            <span class="text-[9px] md:text-[11px] font-mono text-emerald-400 shrink-0">${formatShortIDR(item.billed)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+            
+            safeSetText('ui-final-price', `IDR ${formatShortIDR(state.intent.cap)}`);
+        }
+
+        // Modal Logic
+        function toggleClientModal(show) {
+            const modal = document.getElementById('client-modal');
+            if (!modal) return;
+            
+            if(show) {
+                modal.classList.remove('hidden');
+                populateClientModal();
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function populateClientModal() {
+            safeSetText('modal-fp-title', state.intent.name || 'Garuda Spark Hub');
+            safeSetText('modal-fp-area', state.telemetry.usableSqm.toFixed(1) + ' m²');
+            safeSetText('modal-fp-wall', state.config.thickness.name);
+            safeSetText('modal-fp-render', 'Render: ' + state.config.render.name);
+            
+            safeSetText('modal-doc-title', state.intent.name || 'Garuda Spark Hub');
+            safeSetText('modal-total-price', `IDR ${formatIDR(state.intent.cap)}`);
+            
+            const tbody = document.getElementById('modal-boq-body');
+            if (!tbody) return;
+            
+            let html = '';
+            state.finalBoq.forEach(item => {
+                html += `
+                    <tr>
+                        <td class="py-2 md:py-3 px-2 md:px-4">
+                            <div class="font-bold text-zinc-800 text-[10px] md:text-xs">${item.desc}</div>
+                            <div class="text-[8px] md:text-[9px] text-zinc-400 font-mono mt-0.5">${item.id}</div>
+                        </td>
+                        <td class="py-2 md:py-3 px-2 md:px-4 text-center text-zinc-600 font-mono text-[9px] md:text-xs">${item.qty} <span class="text-[7px] md:text-[8px]">${item.unit}</span></td>
+                        <td class="py-2 md:py-3 px-2 md:px-4 text-right font-mono font-bold text-zinc-800 text-[9px] md:text-xs">${formatIDR(item.billed)}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function exportCSV() {
+            const headers = "Item Code,Trade Category,Description,Quantity,Unit,Total Cost (IDR)\n";
+            const rows = state.finalBoq.map(b => `${b.id},${b.cat},"${b.desc}",${b.qty},${b.unit},${b.billed}`).join("\n");
+            const totalRow = `\n,,,"GUARANTEED MAXIMUM PRICE",,"${state.intent.cap}"`;
+            const csvContent = headers + rows + totalRow;
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `GreenShift_Master_BoQ.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Bulletproof Print PDF
+        function triggerPrintPDF() {
+            const printCanvas = document.getElementById('print-canvas');
+            if (!printCanvas) return;
+
+            let html = `
+                <div class="print-header">
+                    <h1 style="font-size: 24px; font-weight: bold; margin:0;">GreenShift Studio</h1>
+                    <p style="color: #666; margin:0; font-size: 12px;">Official BoQ Matrix - ${state.intent.name} - ${state.intent.location}</p>
+                </div>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th style="text-align:center;">Qty</th>
+                            <th style="text-align:right;">Total (IDR)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            state.finalBoq.forEach(item => {
+                html += `
+                    <tr>
+                        <td><strong>${item.desc}</strong><br><small style="color:#666">${item.id}</small></td>
+                        <td style="text-align:center;">${item.qty} ${item.unit}</td>
+                        <td style="text-align:right;">${formatIDR(item.billed)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    <tr>
+                        <td colspan="2" class="print-total">GUARANTEED MAXIMUM PRICE</td>
+                        <td class="print-total" style="text-align:right; color:#10b981;">IDR ${formatIDR(state.intent.cap)}</td>
+                    </tr>
+                </tbody></table>
+                <div style="margin-top: 40px; font-size: 10px; color: #888; text-align: center;">Generated securely via GreenShift Wizard OS</div>
+            `;
+            
+            printCanvas.innerHTML = html;
+            window.print();
+        }
+
+    </script>
+</body>
+</html>
